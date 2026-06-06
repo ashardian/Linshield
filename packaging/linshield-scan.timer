@@ -1,0 +1,11 @@
+[Unit]
+Description=Run LinShield quick scan daily
+Documentation=https://github.com/linshield/linshield
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=1800
+Persistent=true
+
+[Install]
+WantedBy=timers.target

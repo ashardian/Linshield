@@ -1,0 +1,24 @@
+[Unit]
+Description=LinShield real-time malware protection
+Documentation=https://github.com/linshield/linshield
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/linshield monitor
+Restart=on-failure
+RestartSec=5
+
+# Hardening — the monitor needs broad read access but little else.
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

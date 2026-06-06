@@ -1,0 +1,19 @@
+[Unit]
+Description=LinShield community YARA rule update
+Documentation=https://github.com/linshield/linshield
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/linshield update yara-forge-core
+Nice=15
+IOSchedulingClass=idle
+
+# Hardening
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true

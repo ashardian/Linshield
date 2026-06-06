@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinShield · Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ version }}" />
+</head>
+<body>
+  <div class="app">
+    <!-- ============ NAV RAIL ============ -->
+    <aside class="rail">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M30 2 L56 13 V32 C56 50 44 60 30 66 C16 60 4 50 4 32 V13 Z"
+                stroke="#b6f24a" stroke-width="2.5" fill="rgba(182,242,74,0.06)"/>
+          <path d="M19 33 l8 8 l15 -17" stroke="#b6f24a" stroke-width="3.2"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div>
+          <div class="word">Lin<b>Shield</b></div>
+          <div class="ver" id="brand-ver">v{{ version }}</div>
+        </div>
+      </div>
+
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-view="scan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <span>Scan</span>
+      </div>
+      <div class="nav-item" data-view="quarantine">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4"/><path d="M5 8v12h14V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        <span>Quarantine</span>
+      </div>
+      <div class="nav-item" data-view="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span>History</span>
+      </div>
+      <div class="nav-item" data-view="tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6Z"/></svg>
+        <span>Tools</span>
+      </div>
+      <div class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2.2-1.3L16 2H8l-.4 2.5a7 7 0 0 0-2.2 1.3l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 3 12c0 .4 0 .9.1 1.3l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2.2 1.3L8 22h8l.4-2.5a7 7 0 0 0 2.2-1.3l2.3 1 2-3.4-2-1.5c.1-.4.1-.9.1-1.3Z"/></svg>
+        <span>Settings</span>
+      </div>
+
+      <div class="rail-foot">
+        <div><span class="dot">●</span> ENGINE ONLINE</div>
+        <div id="foot-mode">local · 127.0.0.1</div>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+      <div class="topbar">
+        <h1><span class="pre" id="crumb-pre">//</span> <span id="crumb">DASHBOARD</span></h1>
+        <div class="topbar-actions">
+          <button class="btn ghost" id="btn-report">Export Report</button>
+          <button class="btn ghost" id="btn-refresh">Refresh</button>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <section class="view" id="view-dashboard">
+        <div class="hero fade-up" id="hero">
+          <div class="hero-shield" id="hero-shield"></div>
+          <div class="hero-info">
+            <div class="state" id="hero-state">CHECKING…</div>
+            <div class="desc" id="hero-desc">Querying engine status.</div>
+            <div class="meta" id="hero-meta"></div>
+          </div>
+        </div>
+
+        <div class="card rtp fade-up d1" id="rtp-card" style="margin-top:18px">
+          <div class="rtp-main">
+            <div>
+              <div class="rtp-title">Real-Time Protection</div>
+              <div class="rtp-desc" id="rtp-desc">Continuously scans files as they're written and isolates threats on contact.</div>
+            </div>
+            <label class="switch lg" title="Master protection toggle">
+              <input type="checkbox" id="rtp-toggle" />
+              <span class="track"></span>
+            </label>
+          </div>
+          <div class="rtp-stats" id="rtp-stats" hidden>
+            <div><span>Scanned</span><b id="rtp-scanned">0</b></div>
+            <div><span>Detected</span><b id="rtp-detected">0</b></div>
+            <div><span>Quarantined</span><b id="rtp-quar">0</b></div>
+            <div><span>Watching</span><b id="rtp-paths">—</b></div>
+          </div>
+        </div>
+
+        <div class="grid cols-4" style="margin-top:18px">
+          <div class="card stat fade-up d1"><div class="label">Total Scans</div><div class="value" id="s-scans">—</div></div>
+          <div class="card stat accent fade-up d2"><div class="label">Detections</div><div class="value" id="s-det">—</div><div class="sub">all-time findings</div></div>
+          <div class="card stat warn fade-up d3"><div class="label">Quarantined</div><div class="value" id="s-quar">—</div><div class="sub">isolated items</div></div>
+          <div class="card stat fade-up d4"><div class="label">FIM Baseline</div><div class="value" id="s-base">—</div><div class="sub">tracked files</div></div>
+        </div>
+
+        <div class="grid cols-2 fade-up d4" style="margin-top:18px">
+          <div class="card">
+            <h3>Detection Engines</h3>
+            <div class="chip-row" id="engines"></div>
+          </div>
+          <div class="card">
+            <h3>Perimeter</h3>
+            <div class="chip-row" id="perimeter"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCAN -->
+      <section class="view" id="view-scan" hidden>
+        <div class="card">
+          <h3>Select Scan Profile</h3>
+          <div class="scan-modes">
+            <div class="mode sel" data-mode="quick"><div class="t">Quick Scan</div><div class="d">Common infection hotspots — temp dirs, downloads, caches.</div></div>
+            <div class="mode" data-mode="full"><div class="t">Full Scan</div><div class="d">Walk the entire filesystem from root. Slow but thorough.</div></div>
+            <div class="mode" data-mode="custom"><div class="t">Custom</div><div class="d">Scan a specific set of paths you provide below.</div></div>
+          </div>
+          <div class="field" id="custom-field" hidden>
+            <label>Paths to scan (one per line)</label>
+            <textarea id="custom-paths" placeholder="/home/user/Downloads&#10;/tmp"></textarea>
+          </div>
+          <div class="row spread">
+            <label class="toggle-row" style="border:none;padding:0;gap:12px">
+              <span class="tl">Auto-quarantine infected files</span>
+              <span class="switch"><input type="checkbox" id="scan-autoq" /><span class="track"></span></span>
+            </label>
+            <div class="row">
+              <button class="btn" id="btn-cancel" disabled>Cancel</button>
+              <button class="btn primary" id="btn-scan">Start Scan</button>
+            </div>
+          </div>
+          <div class="progress-wrap" id="progress" hidden>
+            <div class="bar"><div class="fill"></div></div>
+            <div class="scan-live">
+              <span id="scan-count">0 files</span>
+              <span class="cur" id="scan-cur">—</span>
+              <span id="scan-elapsed">0.0s</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="scan-result" hidden>
+          <div class="row spread">
+            <div class="section-title mt0">Scan Result</div>
+            <button class="btn danger sm" id="btn-quar-all" hidden>Quarantine all threats</button>
+          </div>
+          <div class="grid cols-4" style="margin-bottom:16px">
+            <div class="card stat"><div class="label">Files</div><div class="value" id="r-files">0</div></div>
+            <div class="card stat bad"><div class="label">Confirmed</div><div class="value" id="r-confirmed">0</div><div class="sub">definitive</div></div>
+            <div class="card stat warn"><div class="label">Likely</div><div class="value" id="r-likely">0</div><div class="sub">corroborated</div></div>
+            <div class="card stat"><div class="label">For review</div><div class="value" id="r-review" style="color:var(--cyan)">0</div><div class="sub">low confidence</div></div>
+          </div>
+          <div class="card">
+            <table>
+              <thead><tr><th>Path</th><th>Confidence</th><th>Signature</th><th>Method</th><th>Severity</th><th>Action</th></tr></thead>
+              <tbody id="r-rows"></tbody>
+            </table>
+          </div>
+          <p id="r-review-note" hidden style="color:var(--text-dim);font-size:12px;margin-top:10px;line-height:1.6">
+            <strong style="color:var(--cyan)">About "for review" items:</strong> these are single pattern or heuristic matches. They're frequently false positives — common on security tools, installers, and source code. Investigate before acting; nothing is quarantined automatically below the "confirmed" tier.
+          </p>
+        </div>
+      </section>
+
+      <!-- QUARANTINE -->
+      <section class="view" id="view-quarantine" hidden>
+        <div class="card">
+          <h3>Quarantine Vault</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Original Path</th><th>Signature</th><th>Severity</th><th>Quarantined</th><th></th></tr></thead>
+            <tbody id="q-rows"></tbody>
+          </table>
+          <div class="empty" id="q-empty" hidden>Vault is empty — nothing isolated.</div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="view" id="view-history" hidden>
+        <div class="card">
+          <h3>Recent Scans</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Files</th><th>Infected</th><th>Suspicious</th><th>When</th></tr></thead>
+            <tbody id="h-scans"></tbody>
+          </table>
+          <div class="empty" id="h-scans-empty" hidden>No scans recorded yet.</div>
+        </div>
+        <div class="section-title">Detection Log</div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Path</th><th>Verdict</th><th>Signature</th><th>Severity</th><th>When</th></tr></thead>
+            <tbody id="h-det"></tbody>
+          </table>
+          <div class="empty" id="h-det-empty" hidden>No detections logged.</div>
+        </div>
+        <div class="section-title">Event Stream</div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Category</th><th>Title</th><th>Severity</th><th>Detail</th><th>When</th></tr></thead>
+            <tbody id="h-evt"></tbody>
+          </table>
+          <div class="empty" id="h-evt-empty" hidden>No events recorded.</div>
+        </div>
+      </section>
+
+      <!-- TOOLS -->
+      <section class="view" id="view-tools" hidden>
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>Rootkit Sweep</h3>
+            <p style="color:var(--text-dim);font-size:12.5px;margin-bottom:14px">Checks preload hijacks, hidden PIDs, promiscuous NICs and suspicious listeners.</p>
+            <button class="btn primary" id="btn-rootkit">Run Sweep</button>
+          </div>
+          <div class="card">
+            <h3>File Integrity (FIM)</h3>
+            <p style="color:var(--text-dim);font-size:12.5px;margin-bottom:14px">Hash critical system files, then detect tampering against the baseline.</p>
+            <div class="row">
+              <button class="btn" id="btn-fim-init">Build Baseline</button>
+              <button class="btn primary" id="btn-fim-check">Check</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Firewall</h3>
+            <p style="color:var(--text-dim);font-size:12.5px;margin-bottom:14px">Read-only inspection of the active host firewall backend.</p>
+            <button class="btn" id="btn-fw">Inspect</button>
+          </div>
+        </div>
+
+        <div id="tool-out"></div>
+
+        <div class="section-title">Signature Management</div>
+
+        <div class="card" style="margin-bottom:18px">
+          <div class="row spread mt0">
+            <h3 class="mt0">Community Rule Packs</h3>
+            <span class="chip" id="upd-total"><span class="led"></span>—</span>
+          </div>
+          <p style="color:var(--text-dim);font-size:12.5px;margin:6px 0 14px">Download curated open-source YARA rules for Linux malware. Packs install into your rules directory and are validated before activation. Requires network access; upstream licenses apply.</p>
+          <div class="row" style="gap:10px;align-items:flex-end">
+            <div class="field mt0" style="flex:1;margin:0">
+              <label>Source</label>
+              <select id="upd-source"></select>
+            </div>
+            <button class="btn primary" id="btn-update">Update Rules</button>
+          </div>
+          <p style="color:var(--text-faint);font-size:11.5px;margin-top:10px" id="upd-desc"></p>
+          <div id="upd-out" style="margin-top:6px"></div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="row spread mt0">
+              <h3 class="mt0">Import YARA Rules</h3>
+              <span class="chip" id="yara-count"><span class="led"></span>—</span>
+            </div>
+            <p style="color:var(--text-dim);font-size:12.5px;margin:6px 0 12px">Paste a ruleset or load a <span class="mono-txt">.yar</span> file. Rules are validated before they're saved, then loaded into the engine immediately.</p>
+            <div class="field mt0">
+              <label>Rule file name</label>
+              <input type="text" id="yara-name" placeholder="my-rules.yar" />
+            </div>
+            <div class="field">
+              <label>Rules</label>
+              <textarea id="yara-text" spellcheck="false" style="min-height:150px" placeholder="rule Example {
+  strings:
+    $a = &quot;malicious-marker&quot;
+  condition:
+    $a
+}"></textarea>
+            </div>
+            <div class="row spread">
+              <label class="btn ghost sm" style="cursor:pointer">
+                Load .yar file…
+                <input type="file" id="yara-file" accept=".yar,.yara,text/plain" hidden />
+              </label>
+              <button class="btn primary" id="btn-yara-import">Validate &amp; Import</button>
+            </div>
+            <div id="yara-list" style="margin-top:16px"></div>
+          </div>
+
+          <div class="card">
+            <h3>Custom Hash Signature</h3>
+            <p style="color:var(--text-dim);font-size:12.5px;margin-bottom:12px">Flag a specific file by its SHA-256 as known-malicious.</p>
+            <div class="field mt0">
+              <label>SHA-256 (64 hex chars)</label>
+              <input type="text" id="hash-digest" spellcheck="false" placeholder="e3b0c44298fc1c14…" />
+            </div>
+            <div class="field">
+              <label>Signature name</label>
+              <input type="text" id="hash-name" placeholder="Custom.Malware.Name" />
+            </div>
+            <div class="field">
+              <label>Severity</label>
+              <select id="hash-sev">
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high" selected>high</option>
+                <option value="critical">critical</option>
+              </select>
+            </div>
+            <div class="row spread">
+              <button class="btn ghost" id="btn-sig-reload">Reload Signatures</button>
+              <button class="btn primary" id="btn-add-hash">Add Signature</button>
+            </div>
+            <p style="color:var(--text-faint);font-size:11.5px;margin-top:14px" id="hash-count-line">—</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings" hidden>
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Detection Engines</h3>
+            <div class="toggle-row"><div class="tl">Hash signatures<small>SHA-256 known-bad database</small></div><span class="switch"><input type="checkbox" data-cfg="use_hashes" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">YARA rules<small>Pattern-based heuristics</small></div><span class="switch"><input type="checkbox" data-cfg="use_yara" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">ClamAV<small>External engine, if installed</small></div><span class="switch"><input type="checkbox" data-cfg="use_clamav" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">Heuristics<small>Behavioural / structural checks</small></div><span class="switch"><input type="checkbox" data-cfg="use_heuristics" /><span class="track"></span></span></div>
+          </div>
+          <div class="card">
+            <h3>Behaviour</h3>
+            <div class="toggle-row"><div class="tl">Auto-quarantine on scan<small>Isolate infected files automatically</small></div><span class="switch"><input type="checkbox" data-cfg="auto_quarantine" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">Real-time auto-quarantine<small>Applies to the monitor daemon</small></div><span class="switch"><input type="checkbox" data-cfg="realtime_auto_quarantine" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">Follow symlinks<small>May expand scan scope significantly</small></div><span class="switch"><input type="checkbox" data-cfg="follow_symlinks" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">Scan inside archives<small>Inspect zip/tar contents where supported</small></div><span class="switch"><input type="checkbox" data-cfg="scan_archives" /><span class="track"></span></span></div>
+            <div class="toggle-row"><div class="tl">Strict mode<small>Hide low-confidence "review" items; show only confirmed &amp; likely</small></div><span class="switch"><input type="checkbox" data-cfg="strict_mode" /><span class="track"></span></span></div>
+            <div class="field" style="margin-top:16px"><label>Max file size (MB)</label><input type="number" id="cfg-maxsize" min="1" /></div>
+          </div>
+          <div class="card">
+            <h3>Quick Scan Paths</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Targeted by the "Quick Scan" profile.</p>
+            <textarea id="cfg-quick" placeholder="one path per line"></textarea>
+          </div>
+          <div class="card">
+            <h3>Full Scan Roots</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Walked top-down by the "Full Scan" profile.</p>
+            <textarea id="cfg-full" placeholder="one path per line (e.g. /)"></textarea>
+          </div>
+          <div class="card">
+            <h3>Real-Time Watch Paths</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Directories watched live when protection is on.</p>
+            <textarea id="cfg-realtime" placeholder="one path per line"></textarea>
+          </div>
+          <div class="card">
+            <h3>File Integrity Paths</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Files hashed for the FIM baseline.</p>
+            <textarea id="cfg-fim" placeholder="one path per line"></textarea>
+          </div>
+          <div class="card">
+            <h3>Exclusions</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Paths/patterns skipped by every scan.</p>
+            <textarea id="cfg-exclude" placeholder="one path/pattern per line"></textarea>
+          </div>
+          <div class="card">
+            <h3>Trusted Paths (allowlist)</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Files under these paths are never scanned or flagged — e.g. your own security tooling.</p>
+            <textarea id="cfg-trusted" placeholder="one path per line (e.g. /home/you/tools)"></textarea>
+          </div>
+          <div class="card">
+            <h3>Alert Webhook (optional)</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">For servers: real-time detections POST a JSON alert to this URL. Leave blank to disable.</p>
+            <input type="text" id="cfg-webhook" class="text-in" placeholder="https://hooks.example.com/linshield" />
+          </div>
+          <div class="card">
+            <h3>Web Console</h3>
+            <p style="color:var(--text-faint);font-size:11.5px;margin:-6px 0 10px">Applies the next time the GUI is launched.</p>
+            <div class="field mt0"><label>Bind host</label><input type="text" id="cfg-host" placeholder="127.0.0.1" /></div>
+            <div class="field"><label>Port</label><input type="number" id="cfg-port" min="1" max="65535" /></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:18px;justify-content:flex-end">
+          <button class="btn ghost" id="btn-reset-cfg">Reload</button>
+          <button class="btn primary" id="btn-save-cfg">Save Settings</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="{{ url_for('static', filename='app.js') }}?v={{ version }}"></script>
+</body>
+</html>

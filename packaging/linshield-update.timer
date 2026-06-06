@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh LinShield YARA rules weekly
+Documentation=https://github.com/linshield/linshield
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00
+RandomizedDelaySec=3600
+Persistent=true
+
+[Install]
+WantedBy=timers.target
