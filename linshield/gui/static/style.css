@@ -388,6 +388,18 @@ td.path {
 .conf.likely { color: var(--amber); border-color: rgba(242, 193, 74, 0.55); }
 .conf.review { color: var(--cyan); border-color: rgba(92, 214, 200, 0.45); }
 
+/* detection detail subtitle — shown under signature name */
+.det {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-top: 4px;
+  line-height: 1.55;
+  font-weight: 400;
+  white-space: normal;
+}
+
 /* severity badges */
 .sev {
   display: inline-block;

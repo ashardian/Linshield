@@ -206,6 +206,7 @@ function animateNum(el, target) {
 /* ---------------- scan ---------------- */
 let scanMode = "quick";
 let pollTimer = null;
+let lastDetections = [];
 
 $$(".mode").forEach((m) =>
   m.addEventListener("click", () => {
@@ -287,7 +288,7 @@ function renderScanResult(s) {
     return `<tr data-row="${i}">
       <td class="path" title="${esc(d.path)}">${esc(d.path)}</td>
       <td>${confBadge(conf)}</td>
-      <td class="mono">${esc(d.signature)}</td>
+      <td class="mono">${esc(d.signature)}${d.details ? `<span class="det">${esc(d.details)}</span>` : ""}</td>
       <td class="mono">${esc(d.method)}</td>
       <td>${sevBadge(d.severity)}</td>
       <td data-action>${action}</td></tr>`;
