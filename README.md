@@ -54,10 +54,10 @@ LinShield ships with a built-in **EICAR** test signature so you can verify detec
 LinShield needs **Python 3.10+**.
 
 ```bash
-unzip linshield-1.0.8.zip
-cd linshield-1.0.8
+git clone https://github.com/ashardian/Linshield.git
+cd Linshield
 
-# Recommended: virtualenv (clean, conflict-free, no sudo)
+#virtualenv (clean, conflict-free, no sudo)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install ".[full]"          # CLI + GUI + YARA engine + rich output
