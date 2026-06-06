@@ -7,7 +7,8 @@
 <br>
 
 <!-- Replace with your actual banner image -->
-![LinShield Banner](https://raw.githubusercontent.com/your-org/linshield/main/assets/banner.png)
+![LinShield Banner](https://github.com/ashardian/Linshield/blob/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png)
+
 
 <br>
 
