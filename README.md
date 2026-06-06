@@ -13,6 +13,11 @@
 
 </div>
 
+<br>
+
+<!-- Replace with your actual banner image -->
+![LinShield Banner](https://github.com/ashardian/Linshield/blob/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png)
+
 ---
 
 LinShield is a single, coherent defensive security tool with both a **CLI** and a **localhost web GUI** that share one detection engine. It runs on desktops and servers, as a normal user or as root, and degrades gracefully when optional components aren't installed.
@@ -21,10 +26,7 @@ It is built as a **triage and visibility** tool — it shows you what looks off 
 
 ---
 
-<br>
 
-<!-- Replace with your actual banner image -->
-![LinShield Banner](https://github.com/ashardian/Linshield/blob/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png)
 
 ## Contents
 
