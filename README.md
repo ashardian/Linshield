@@ -6,12 +6,6 @@
 
 <br>
 
-<!-- Replace with your actual banner image -->
-![LinShield Banner](https://github.com/ashardian/Linshield/blob/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png)
-
-
-<br>
-
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)
 ![Version](https://img.shields.io/badge/Version-1.0.8-green?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
@@ -26,6 +20,11 @@ LinShield is a single, coherent defensive security tool with both a **CLI** and 
 It is built as a **triage and visibility** tool — it shows you what looks off so you can investigate, not something that deletes files blindly. A core design goal is that **false positives never cause panic** (see [Confidence tiers](#confidence-tiers)).
 
 ---
+
+<br>
+
+<!-- Replace with your actual banner image -->
+![LinShield Banner](https://github.com/ashardian/Linshield/blob/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png)
 
 ## Contents
 
