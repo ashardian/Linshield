@@ -73,10 +73,10 @@ It is built as a **triage and visibility** tool — it shows you what looks off 
 Requires **Python 3.10+**.
 
 ```bash
-unzip linshield-1.0.8.zip
-cd linshield-1.0.8
+git clone https://github.com/ashardian/Linshield.git
+cd linshield
 
-# Recommended: virtualenv (clean, conflict-free, no sudo)
+virtualenv (clean, conflict-free, no sudo)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install ".[full]"          # CLI + GUI + YARA engine + rich output
@@ -86,6 +86,11 @@ Or use the installer, which handles Debian/Kali's externally-managed Python and 
 
 ```bash
 sudo ./install.sh
+```
+If you want to use GUI run this command in the terminal:
+
+```bash
+linshield gui
 ```
 
 > **Debian / Kali note:** Installing into system Python triggers PEP 668 (`externally-managed-environment`). Use the virtualenv above, or `install.sh`, which passes `--break-system-packages` and reinstalls **only** LinShield — never your apt-managed dependencies.
