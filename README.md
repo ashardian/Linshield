@@ -68,6 +68,13 @@ Or use the installer, which handles Debian/Kali's externally-managed Python and 
 ```bash
 sudo ./install.sh
 ```
+After install if want to use GUI then type this command in terminal:
+
+```bash
+linshield gui
+```
+
+
 
 > On Debian/Kali, installing into system Python triggers PEP 668
 > (`externally-managed-environment`). Use the virtualenv above, or `install.sh`,
