@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LinShield — Open-source endpoint security for Linux</title>
+<meta name="description" content="LinShield is an open-source endpoint security suite for Linux — multi-engine scanning with a confidence-tier model that keeps false positives from causing panic. Real-time protection, quarantine, rootkit & integrity checks, with both a CLI and a localhost web console." />
+<meta property="og:title" content="LinShield — endpoint security for Linux that doesn't cry wolf" />
+<meta property="og:description" content="Multi-engine scanning, confidence tiers, real-time protection, quarantine, rootkit & FIM checks. CLI + localhost web console. MIT." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#07090a; --bg-2:#0c0f11; --panel:#0f1316; --panel-2:#131a1d;
+  --line:#1d262b; --line-2:#2a363c;
+  --text:#dfe7e4; --text-dim:#9aa8a4; --text-faint:#67746f;
+  --lime:#b6f24a; --lime-dim:#86b53a; --amber:#f2c14a;
+  --coral:#ff6b5e; --crimson:#e8443a; --cyan:#5cd6c8;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;
+  --maxw:1140px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(900px 600px at 78% -8%, rgba(182,242,74,0.10), transparent 60%),
+  radial-gradient(800px 700px at 10% 0%, rgba(92,214,200,0.06), transparent 55%),
+  linear-gradient(180deg,#07090a,#06080a 60%,#05070a);}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);
+  background-size:48px 48px;mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 80%);}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);font-weight:600}
+
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(7,9,10,0.72);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:62px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:700;letter-spacing:.5px}
+.brand svg{width:26px;height:30px;filter:drop-shadow(0 0 10px rgba(182,242,74,.35))}
+.brand .v{font-size:11px;color:var(--text-faint);font-weight:500;border:1px solid var(--line-2);padding:1px 7px;border-radius:20px;margin-left:2px}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:14px}
+.nav-links a{color:var(--text-dim);transition:color .15s;font-weight:500}
+.nav-links a:hover{color:var(--lime)}
+.nav-links .gh{color:var(--bg);background:var(--lime);padding:8px 16px;border-radius:6px;font-weight:600;font-family:var(--mono);font-size:13px;transition:transform .15s,box-shadow .15s}
+.nav-links .gh:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(182,242,74,.28);color:var(--bg)}
+.burger{display:none;background:none;border:1px solid var(--line-2);color:var(--text);width:40px;height:36px;border-radius:7px;font-size:18px;cursor:pointer}
+
+.hero{padding:84px 0 56px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}
+.hero h1{font-family:var(--mono);font-weight:700;font-size:54px;line-height:1.04;letter-spacing:-1px;margin:18px 0 0}
+.hero h1 .glow{color:var(--lime);text-shadow:0 0 28px rgba(182,242,74,.45)}
+.hero .lead{font-size:19px;color:var(--text-dim);margin:22px 0 30px;max-width:46ch}
+.hero .lead b{color:var(--text);font-weight:600}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:14px;font-weight:600;padding:13px 22px;border-radius:8px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;display:inline-flex;align-items:center;gap:9px;border:1px solid transparent}
+.btn.primary{background:var(--lime);color:var(--bg)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(182,242,74,.3)}
+.btn.ghost{background:transparent;border-color:var(--line-2);color:var(--text)}
+.btn.ghost:hover{border-color:var(--lime);color:var(--lime)}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px;align-items:center}
+.hero-badges img{height:21px}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:20px}
+.chip b{color:var(--lime);font-weight:600}
+
+.term{background:linear-gradient(180deg,#0c1013,#0a0d0f);border:1px solid var(--line-2);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(182,242,74,.04)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#0e1316;border-bottom:1px solid var(--line)}
+.term-bar i{width:11px;height:11px;border-radius:50%;display:block}
+.term-bar .r{background:#ff5f57}.term-bar .y{background:#febc2e}.term-bar .g{background:#28c840}
+.term-bar span{margin-left:8px;font-family:var(--mono);font-size:12px;color:var(--text-faint)}
+.term-body{padding:18px;font-family:var(--mono);font-size:13px;line-height:1.85;min-height:288px}
+.term-body .p{color:var(--lime)}.term-body .c{color:var(--text)}.term-body .o{color:var(--text-dim)}
+.term-body .conf{color:var(--crimson);font-weight:600}.term-body .lk{color:var(--amber);font-weight:600}
+.term-body .rv{color:var(--cyan);font-weight:600}.term-body .ok{color:var(--lime)}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--lime);vertical-align:-2px;animation:blink 1.1s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+
+.banner{padding:8px 0 18px}
+.banner .frame{border:1px solid var(--line-2);border-radius:14px;overflow:hidden;background:var(--panel);box-shadow:0 30px 80px -40px rgba(0,0,0,.9)}
+.banner img{display:block;width:100%;height:auto}
+
+section{padding:70px 0;position:relative}
+.sec-head{max-width:660px;margin-bottom:42px}
+.sec-head h2{font-family:var(--mono);font-size:33px;letter-spacing:-.5px;margin:12px 0 14px;line-height:1.15}
+.sec-head p{color:var(--text-dim);font-size:16.5px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--line-2),transparent)}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:13px;padding:24px 22px;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 120px at 0% 0%,rgba(182,242,74,.07),transparent 70%);opacity:0;transition:opacity .25s}
+.card:hover{transform:translateY(-4px);border-color:var(--line-2);box-shadow:0 18px 44px -24px rgba(0,0,0,.9)}
+.card:hover::before{opacity:1}
+.card .ic{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;background:rgba(182,242,74,.1);border:1px solid rgba(182,242,74,.22);margin-bottom:15px}
+.card .ic svg{width:20px;height:20px;stroke:var(--lime)}
+.card h3{font-family:var(--mono);font-size:16px;margin-bottom:8px;font-weight:600}
+.card p{font-size:14px;color:var(--text-dim);line-height:1.6}
+
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tier{border-radius:13px;padding:26px 24px;border:1px solid var(--line);background:var(--panel);position:relative}
+.tier .tag{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border-radius:5px;border:1px solid;font-weight:600;display:inline-block;margin-bottom:16px}
+.tier.confirmed{border-color:rgba(232,68,58,.4)}.tier.confirmed .tag{color:#fff;background:var(--crimson);border-color:var(--crimson)}
+.tier.likely{border-color:rgba(242,193,74,.35)}.tier.likely .tag{color:var(--amber);border-color:rgba(242,193,74,.55)}
+.tier.review{border-color:rgba(92,214,200,.3)}.tier.review .tag{color:var(--cyan);border-color:rgba(92,214,200,.45)}
+.tier h3{font-size:17px;margin-bottom:9px;font-family:var(--sans)}
+.tier p{font-size:14px;color:var(--text-dim);margin-bottom:16px;min-height:66px}
+.tier .meta{font-family:var(--mono);font-size:12px;color:var(--text-faint);border-top:1px dashed var(--line-2);padding-top:13px}
+.tier .meta b{color:var(--text-dim)}
+.note{margin-top:24px;border-left:2px solid var(--cyan);background:rgba(92,214,200,.05);padding:15px 18px;border-radius:0 8px 8px 0;font-size:14px;color:var(--text-dim)}
+.note b{color:var(--cyan)}
+
+.pipe{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:8px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:20px 18px;position:relative}
+.stage .n{font-family:var(--mono);font-size:12px;color:var(--lime);font-weight:600}
+.stage h4{font-family:var(--mono);font-size:15px;margin:8px 0 7px}
+.stage p{font-size:13px;color:var(--text-dim)}
+.stage .arrow{position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--line-2);font-size:18px;z-index:2}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:26px}
+.block h3{font-family:var(--mono);font-size:17px;margin-bottom:14px}
+.block ul{list-style:none}
+.block li{font-size:14px;color:var(--text-dim);padding:7px 0 7px 24px;position:relative;line-height:1.55}
+.block li::before{content:"▹";position:absolute;left:0;color:var(--lime)}
+.block li b{color:var(--text)}
+
+.code{background:#0a0d0f;border:1px solid var(--line-2);border-radius:11px;overflow:hidden;margin-top:8px;position:relative}
+.code-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--line);background:#0c1013}
+.code-bar span{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);letter-spacing:.5px}
+.code-bar button{background:none;border:1px solid var(--line-2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:5px;cursor:pointer;transition:.15s}
+.code-bar button:hover{border-color:var(--lime);color:var(--lime)}
+.code pre{padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85}
+.code .pr{color:var(--lime)}.code .cm{color:var(--text-faint)}.code .fl{color:var(--cyan)}
+
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.step h3{font-family:var(--mono);font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.step h3 .num{width:24px;height:24px;border-radius:6px;background:rgba(182,242,74,.12);border:1px solid rgba(182,242,74,.3);color:var(--lime);display:grid;place-items:center;font-size:12px}
+.step p{font-size:13.5px;color:var(--text-dim);margin-bottom:6px}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tab{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.tab h4{font-family:var(--mono);font-size:14px;color:var(--lime);margin-bottom:8px}
+.tab p{font-size:13.5px;color:var(--text-dim)}
+
+.cli{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.cli .row{display:grid;grid-template-columns:250px 1fr;gap:18px;padding:13px 22px;border-bottom:1px solid var(--line);font-size:14px}
+.cli .row:last-child{border-bottom:none}
+.cli .row:hover{background:var(--panel-2)}
+.cli .cmd{font-family:var(--mono);color:var(--lime);font-size:13px}
+.cli .desc{color:var(--text-dim)}
+
+.band{background:linear-gradient(180deg,rgba(182,242,74,.04),transparent);border:1px solid var(--line);border-radius:14px;padding:30px 28px}
+.band h3{font-family:var(--mono);font-size:16px;margin-bottom:14px;color:var(--lime)}
+.band ul{list-style:none}
+.band li{font-size:14px;color:var(--text-dim);padding:6px 0 6px 24px;position:relative}
+.band li::before{content:"+";position:absolute;left:0;color:var(--lime);font-family:var(--mono);font-weight:700}
+.band li b{color:var(--text)}
+
+footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:30px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.foot .l{font-family:var(--mono);font-size:13px;color:var(--text-faint);max-width:62ch;line-height:1.6}
+.foot .l b{color:var(--lime)}
+.foot-links{display:flex;gap:24px;font-size:13px;font-family:var(--mono)}
+.foot-links a{color:var(--text-dim)}
+.foot-links a:hover{color:var(--lime)}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:36px}
+  .hero h1{font-size:40px}
+  .feat-grid,.tiers,.pipe,.two,.steps,.tabs{grid-template-columns:1fr}
+  .stage .arrow{display:none}
+  .nav-links{display:none}
+  .nav-links.open{display:flex;position:absolute;top:62px;left:0;right:0;flex-direction:column;gap:0;background:var(--bg-2);border-bottom:1px solid var(--line);padding:8px 0}
+  .nav-links.open a{padding:13px 24px;width:100%}
+  .burger{display:block}
+  .cli .row{grid-template-columns:1fr;gap:4px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 2 L56 13 V32 C56 50 44 60 30 66 C16 60 4 50 4 32 V13 Z" stroke="#b6f24a" stroke-width="2.5" fill="rgba(182,242,74,0.06)"/>
+        <path d="M19 33 l8 8 l15 -17" stroke="#b6f24a" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      LinShield <span class="v">v1.0.8</span>
+    </a>
+    <nav class="nav-links" id="navlinks">
+      <a href="#features">Features</a>
+      <a href="#confidence">Confidence</a>
+      <a href="#detection">Detection</a>
+      <a href="#gui">Web GUI</a>
+      <a href="#install">Install</a>
+      <a href="#cli">CLI</a>
+      <a class="gh" href="https://github.com/ashardian/Linshield" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Menu">≡</button>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal in">
+      <span class="kicker">Open-source · Linux · MIT</span>
+      <h1>Endpoint security<br>for Linux that <span class="glow">doesn't cry wolf.</span></h1>
+      <p class="lead">A single, coherent defensive tool — like Windows Defender, but fully scriptable. One detection engine behind both a <b>CLI</b> and a <b>localhost web GUI</b>, with a <b>confidence-tier model</b> so a single fuzzy match is never a definitive conviction.</p>
+      <div class="cta">
+        <a class="btn primary" href="#install">⚡ Get started</a>
+        <a class="btn ghost" href="https://github.com/ashardian/Linshield" target="_blank" rel="noopener">★ Star on GitHub</a>
+      </div>
+      <div class="hero-badges">
+        <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python" alt="Python 3.10+" onerror="this.style.display='none'">
+        <img src="https://img.shields.io/badge/Version-1.0.8-green?style=flat-square" alt="Version 1.0.8" onerror="this.style.display='none'">
+        <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT" onerror="this.style.display='none'">
+        <img src="https://img.shields.io/badge/Platform-Linux-orange?style=flat-square&logo=linux" alt="Linux" onerror="this.style.display='none'">
+      </div>
+    </div>
+    <div class="reveal in" style="transition-delay:.12s">
+      <div class="term">
+        <div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>asad@kali ~ — linshield</span></div>
+        <div class="term-body">
+          <div><span class="p">$</span> <span class="c">linshield scan ~/Downloads</span></div>
+          <div class="o">Scanned 1,284 files (3,110/s) — pass complete</div>
+          <div>&nbsp;</div>
+          <div><span class="conf">🔴 Confirmed (1)</span></div>
+          <div class="o">&nbsp;&nbsp;eicar.com&nbsp;&nbsp;<span class="c">hash</span>&nbsp;EICAR-Test-Signature</div>
+          <div><span class="lk">🟠 Likely (1)</span></div>
+          <div class="o">&nbsp;&nbsp;update.sh&nbsp;&nbsp;<span class="c">yara+heuristic</span>&nbsp;Reverse_Shell</div>
+          <div><span class="rv">🔵 For review (2)</span></div>
+          <div class="o">&nbsp;&nbsp;install.sh&nbsp;<span class="c">heuristic</span>&nbsp;curl-pipe-to-shell</div>
+          <div class="o" style="font-size:11.5px">&nbsp;&nbsp;<span class="rv">↳ frequently a false positive — not auto-actioned</span></div>
+          <div>&nbsp;</div>
+          <div><span class="ok">⚠ 1 confirmed</span><span class="o">, 1 likely, 2 to review · quarantined 1 (confirmed only)</span></div>
+          <div><span class="p">$</span> <span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="banner reveal">
+  <div class="wrap">
+    <div class="frame">
+      <img src="https://raw.githubusercontent.com/ashardian/Linshield/643cde0b5a9079b60e3254dc49984fcc15a07c84/image.png"
+           alt="LinShield console"
+           onerror="this.closest('.banner').style.display='none'">
+    </div>
+  </div>
+</div>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Capabilities</span>
+      <h2>One engine. Every layer of defense.</h2>
+      <p>Layered detection, reversible actions, and graceful degradation when optional components aren't installed. Runs on desktops and servers, as a normal user or as root.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div>
+        <h3>Multi-engine scanning</h3>
+        <p>SHA-256 hashes → YARA rules → ClamAV (optional) → heuristics. Cheapest engines run first and short-circuit on a confirmed hit.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>
+        <h3>Confidence tiers</h3>
+        <p>Every file scored <b>Confirmed / Likely / Review</b> by corroborating engine signals — a single fuzzy match is never a definitive conviction.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div>
+        <h3>Quarantine vault</h3>
+        <p>Threats moved to a locked <span class="mono">0700</span> vault (<span class="mono">chmod 000</span>) with original-permission tracking and full restore/delete. Auto-quarantine touches only the Confirmed tier.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
+        <h3>Real-time protection</h3>
+        <p><span class="mono">watchdog</span> monitor scans files as they're written. Auto-quarantine is opt-in and off by default; fires <span class="mono">notify-send</span> desktop alerts and an optional webhook.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 6h16v12H4z"/><path d="M4 10h16M8 14h4"/></svg></div>
+        <h3>Archive scanning</h3>
+        <p>Looks inside <span class="mono">zip / jar / apk / tar / tar.gz</span> containers — including one level of nested archives — with zip-bomb guards.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l3 6 6 .5-4.5 4 1.5 6L12 15l-6 3.5 1.5-6L3 8.5 9 8z"/></svg></div>
+        <h3>Rootkit / IOC sweep</h3>
+        <p><span class="mono">ld.so.preload</span> hijacks, 40+ rootkit paths, hidden PIDs, promiscuous NICs, suspicious listeners, deleted-executable processes, and kernel-taint flags.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3v18M5 8l7-5 7 5"/><path d="M5 8v8l7 5 7-5V8"/></svg></div>
+        <h3>File Integrity Monitoring</h3>
+        <p>Hash baseline of critical files; reports additions, modifications, deletions, permission changes, and <b>ownership (uid/gid)</b> tampering.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg></div>
+        <h3>Firewall status</h3>
+        <p>Read-only detection of the active backend — ufw / firewalld / nftables / iptables — even when binaries live in <span class="mono">sbin</span> dirs off your PATH.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7M21 4v4h-4"/></svg></div>
+        <h3>Community rule updater</h3>
+        <p>Pulls curated open-source YARA packs (YARA-Forge, Elastic Linux) on demand — like <span class="mono">freshclam</span> for ClamAV — validated before activation.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg></div>
+        <h3>Trusted-path allowlist</h3>
+        <p>Mark paths you vouch for so they're never scanned or flagged. Identical files <i>outside</i> a trusted path are still scanned — precise, not a global mute.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div>
+        <h3>Forensic reports</h3>
+        <p>Export the full security posture as JSON or a self-contained HTML report for archival and incident review.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M7 9l3 2-3 2M13 13h4"/></svg></div>
+        <h3>CLI + Web GUI</h3>
+        <p>Everything works headless from the terminal; the GUI is a localhost-only dashboard with per-session token auth. Built-in EICAR test signature.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="confidence" style="background:linear-gradient(180deg,transparent,rgba(92,214,200,.025),transparent)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">The differentiator</span>
+      <h2>False positives never cause panic.</h2>
+      <p>Rather than flashing a scary red "INFECTED" for a single fuzzy match, LinShield assigns every file a confidence tier by corroborating engine signals.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier confirmed reveal">
+        <span class="tag">🔴 Confirmed</span>
+        <h3>Definitive</h3>
+        <p>An exact SHA-256 hash match or a ClamAV hit. There is no ambiguity here.</p>
+        <div class="meta">Auto-quarantined · <b>yes</b><br>Exit code · <b>2</b></div>
+      </div>
+      <div class="tier likely reveal" style="transition-delay:.08s">
+        <span class="tag">🟠 Likely</span>
+        <h3>Corroborated</h3>
+        <p>Independent engines agree, or a high-specificity rule fired (e.g. a reverse shell). Worth investigating.</p>
+        <div class="meta">Auto-quarantined · <b>no</b><br>Exit code · <b>1</b></div>
+      </div>
+      <div class="tier review reveal" style="transition-delay:.16s">
+        <span class="tag">🔵 Review</span>
+        <h3>Low confidence</h3>
+        <p>A single pattern/heuristic hit. Frequently a false positive. Shown calmly, as information only.</p>
+        <div class="meta">Auto-quarantined · <b>no</b><br>Exit code · <b>0</b></div>
+      </div>
+    </div>
+    <div class="note reveal">
+      <b>Auto-quarantine only ever touches the Confirmed tier.</b> A <span class="mono">curl … | bash</span> installer or a YARA hit on your own script lands in <i>Review</i> and is never silently moved or deleted. <b>Strict mode</b> hides the Review tier entirely for a near-false-positive-free view.
+    </div>
+  </div>
+</section>
+
+<section id="detection">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">How detection works</span>
+      <h2>A four-stage pipeline, cheapest-first.</h2>
+      <p>Each file flows through in order; a confirmed hit short-circuits the slower engines, while heuristics always run so unknown-but-suspicious files still surface.</p>
+    </div>
+    <div class="pipe">
+      <div class="stage reveal"><div class="n">01</div><h4>Hashes</h4><p>Exact match against a known-bad SHA-256 database, seeded with EICAR.</p><span class="arrow">→</span></div>
+      <div class="stage reveal" style="transition-delay:.07s"><div class="n">02</div><h4>YARA</h4><p>Bundled rules plus your <span class="mono">yara/</span> config dir and downloaded community packs.</p><span class="arrow">→</span></div>
+      <div class="stage reveal" style="transition-delay:.14s"><div class="n">03</div><h4>ClamAV</h4><p>If installed, files are also passed to <span class="mono">clamdscan</span>. Fully optional.</p><span class="arrow">→</span></div>
+      <div class="stage reveal" style="transition-delay:.21s"><div class="n">04</div><h4>Heuristics</h4><p>ELFs in temp dirs, unexpected SUID/SGID, hidden ELF dotfiles, reverse-shell patterns.</p></div>
+    </div>
+    <div class="two" style="margin-top:28px">
+      <div class="block reveal">
+        <h3>Tuned for precision over recall</h3>
+        <ul>
+          <li><b>Binaries &amp; archives excluded</b> from shell/script rules — a <span class="mono">.zip</span> containing the bytes <span class="mono">curl</span> isn't flagged.</li>
+          <li><b>Patterns must be contiguous</b> — download + pipe-to-shell on the same line.</li>
+          <li><b>Rule files are never YARA-scanned</b> — they're signature data and would self-match.</li>
+          <li><b>LinShield's own files are exempt</b> via a built-in self-exclusion marker.</li>
+        </ul>
+      </div>
+      <div class="block reveal" style="transition-delay:.08s">
+        <h3>Bring your own intel</h3>
+        <ul>
+          <li><b>Custom hashes</b> — <span class="mono">add-hash</span> one at a time, or <span class="mono">import-hashes</span> a MalwareBazaar CSV.</li>
+          <li><b>Community packs</b> — <span class="mono">update yara-forge-core</span> pulls 45+ vetted repos.</li>
+          <li><b>Elastic Linux rules</b> — Mirai, Gafgyt, Tsunami, miners, Diamorphine, Meterpreter, and more.</li>
+          <li><b>Trusted paths</b> — allowlist tooling that legitimately looks suspicious.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="code reveal" style="margin-top:22px">
+      <div class="code-bar"><span>community rule packs</span><button data-copy>copy</button></div>
+<pre><span class="pr">linshield update --list</span>            <span class="cm"># show available sources</span>
+<span class="pr">linshield update yara-forge-core</span>   <span class="cm"># high-accuracy, low-FP (45+ repos)</span>
+<span class="pr">linshield update elastic-linux</span>     <span class="cm"># Linux malware family rules</span></pre>
+    </div>
+  </div>
+</section>
+
+<section id="gui" style="background:linear-gradient(180deg,transparent,rgba(182,242,74,.03),transparent)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Web console</span>
+      <h2>A localhost dashboard — never on the network.</h2>
+      <p>Binds to <span class="mono">127.0.0.1</span> only and generates a one-time session token on every launch, setting a secure <span class="mono">HttpOnly</span> cookie. Run <span class="mono">linshield gui</span> and it opens your browser.</p>
+    </div>
+    <div class="tabs">
+      <div class="tab reveal"><h4>▸ Dashboard</h4><p>Protection status, all-time counts, engine chips, and a Real-Time Protection master switch with live counters.</p></div>
+      <div class="tab reveal" style="transition-delay:.05s"><h4>▸ Scan</h4><p>Quick / full / custom scans with live progress; results grouped into Confirmed / Likely / Review tiers, with Trust and Quarantine actions per row.</p></div>
+      <div class="tab reveal" style="transition-delay:.1s"><h4>▸ Quarantine</h4><p>Restore or permanently delete isolated files from the locked vault.</p></div>
+      <div class="tab reveal" style="transition-delay:.15s"><h4>▸ History</h4><p>Recent scans, the detection log, and the event stream.</p></div>
+      <div class="tab reveal" style="transition-delay:.2s"><h4>▸ Tools</h4><p>Rootkit sweep, FIM, firewall, and Signature Management — community packs, custom YARA rules, and hash signatures.</p></div>
+      <div class="tab reveal" style="transition-delay:.25s"><h4>▸ Settings</h4><p>Engine toggles, auto-quarantine, archive scanning, strict mode, scan/watch/FIM paths, exclusions, trusted paths, max file size, bind host/port.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Installation</span>
+      <h2>Up and running in under a minute.</h2>
+      <p>Requires Python 3.10+. Use an isolated virtualenv, or the installer for a system-wide setup with optional systemd services.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <h3><span class="num">A</span> Clone + virtualenv (no sudo)</h3>
+        <p>Clean and conflict-free; recommended on Debian/Kali where system Python is externally managed.</p>
+        <div class="code">
+          <div class="code-bar"><span>bash</span><button data-copy>copy</button></div>
+<pre><span class="pr">git clone https://github.com/ashardian/Linshield.git</span>
+<span class="pr">cd</span> Linshield
+python3 -m venv .venv
+<span class="pr">source</span> .venv/bin/activate
+pip install <span class="fl">".[full]"</span>   <span class="cm"># CLI + GUI + YARA + rich</span>
+linshield --version</pre>
+        </div>
+      </div>
+      <div class="step reveal" style="transition-delay:.08s">
+        <h3><span class="num">B</span> Installer — system-wide + services</h3>
+        <p>Handles PEP 668, reinstalls only LinShield, and can place the systemd units.</p>
+        <div class="code">
+          <div class="code-bar"><span>bash</span><button data-copy>copy</button></div>
+<pre><span class="pr">sudo</span> ./install.sh
+
+<span class="cm"># launch the localhost web console</span>
+linshield gui</pre>
+        </div>
+      </div>
+    </div>
+    <div class="two" style="margin-top:22px">
+      <div class="step reveal">
+        <h3><span class="num">✓</span> Verify with EICAR (safe)</h3>
+        <p>The industry-standard, completely harmless antivirus test string.</p>
+        <div class="code">
+          <div class="code-bar"><span>bash</span><button data-copy>copy</button></div>
+<pre>printf 'X5O!P%%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' &gt; /tmp/eicar.com
+linshield scan /tmp/eicar.com   <span class="cm"># CONFIRMED via hash · exits 2</span>
+rm /tmp/eicar.com</pre>
+        </div>
+      </div>
+      <div class="step reveal" style="transition-delay:.08s">
+        <h3><span class="num">⊕</span> Optional: ClamAV engine</h3>
+        <p>Auto-detected if present — adds a full external AV engine. YARA ships with the <span class="mono">[full]</span> extra.</p>
+        <div class="code">
+          <div class="code-bar"><span>bash</span><button data-copy>copy</button></div>
+<pre><span class="pr">sudo</span> apt install clamav clamav-daemon
+<span class="pr">sudo</span> freshclam</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">CLI reference</span>
+      <h2>Everything from the terminal.</h2>
+      <p>Fully scriptable — JSON output, a severity filter, and exit codes that reflect the confidence tier so CI never trips on a low-confidence hint.</p>
+    </div>
+    <div class="cli reveal">
+      <div class="row"><div class="cmd">scan [PATHS]…</div><div class="desc"><span class="mono">--quick · --full · --no-recursive · --quarantine · --json · --min-severity</span>. Exits 2=Confirmed, 1=Likely, 0=clean.</div></div>
+      <div class="row"><div class="cmd">monitor</div><div class="desc">Start real-time protection in the foreground.</div></div>
+      <div class="row"><div class="cmd">quarantine list | restore | delete</div><div class="desc">List, restore, or permanently delete isolated files.</div></div>
+      <div class="row"><div class="cmd">rootkit</div><div class="desc">Run the rootkit / IOC sweep.</div></div>
+      <div class="row"><div class="cmd">fim init | check</div><div class="desc">Build and verify the file-integrity baseline.</div></div>
+      <div class="row"><div class="cmd">firewall</div><div class="desc">Show the host firewall status.</div></div>
+      <div class="row"><div class="cmd">status | history</div><div class="desc">Engine status &amp; counts; recent scans and detections.</div></div>
+      <div class="row"><div class="cmd">signatures add-hash &lt;sha256&gt; &lt;name&gt;</div><div class="desc">Add a custom hash signature.</div></div>
+      <div class="row"><div class="cmd">signatures import-hashes &lt;file&gt;</div><div class="desc">Bulk-import SHA-256 hashes (MalwareBazaar CSV or plain list).</div></div>
+      <div class="row"><div class="cmd">update [SOURCE]</div><div class="desc">Download community YARA rule packs (<span class="mono">--list</span> for sources).</div></div>
+      <div class="row"><div class="cmd">trust [PATH]</div><div class="desc">Manage the trust allowlist (<span class="mono">--list · --remove</span>).</div></div>
+      <div class="row"><div class="cmd">config validate</div><div class="desc">Check that <span class="mono">config.json</span> parses and has no unknown keys.</div></div>
+      <div class="row"><div class="cmd">report --format json | html</div><div class="desc">Write a forensic report.</div></div>
+      <div class="row"><div class="cmd">gui [--host H] [--port P]</div><div class="desc">Launch the localhost web console.</div></div>
+    </div>
+    <div class="two" style="margin-top:22px">
+      <div class="block reveal">
+        <h3>Run as a service (systemd)</h3>
+        <ul>
+          <li><b>linshield-monitor.service</b> — the real-time daemon.</li>
+          <li><b>linshield-scan.timer</b> — a daily scheduled scan.</li>
+          <li><b>linshield-update.timer</b> — a weekly YARA rule refresh.</li>
+          <li>Set <b>alert_webhook</b> for a JSON POST on every detection.</li>
+        </ul>
+      </div>
+      <div class="block reveal" style="transition-delay:.08s">
+        <h3>File locations</h3>
+        <ul>
+          <li><b>As root:</b> <span class="mono">/etc/linshield</span> · <span class="mono">/var/lib/linshield</span></li>
+          <li><b>As user:</b> <span class="mono">~/.config/linshield</span> · <span class="mono">~/.local/share/linshield</span></li>
+          <li>These dirs are always excluded from scanning.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="band reveal">
+      <h3 class="mono">Changelog — v1.0.8</h3>
+      <ul>
+        <li>Confidence tiers now drive real-time protection: auto-quarantine is <b>off by default</b> and only ever acts on <i>Confirmed</i> detections.</li>
+        <li>FIM tracks <b>ownership (uid/gid) changes</b>; rootkit sweep adds <b>deleted-executable process</b> and <b>kernel-taint</b> checks plus a 40+ entry path list.</li>
+        <li>New <span class="mono">signatures import-hashes</span> (MalwareBazaar CSV / plain list), <span class="mono">config validate</span>, and <span class="mono">scan --min-severity</span>.</li>
+        <li>Desktop notifications and an optional server <b>alert webhook</b> on real-time detection.</li>
+        <li><b>Nested</b> archive scanning (one level deep) and a weekly <span class="mono">linshield-update.timer</span>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="l">🛡 <b>LinShield</b> is a defensive tool. Quarantine actions are reversible, firewall inspection is read-only, the GUI is localhost-only with per-session tokens, and nothing below the Confirmed tier is ever auto-actioned. No detection tool eliminates false positives — LinShield surfaces what's worth a human's attention without crying wolf. MIT-licensed.</div>
+    <div class="foot-links">
+      <a href="https://github.com/ashardian/Linshield" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/ashardian/Linshield#readme" target="_blank" rel="noopener">Docs</a>
+      <a href="https://github.com/ashardian/Linshield/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/ashardian/Linshield/releases" target="_blank" rel="noopener">Releases</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.getElementById("burger").addEventListener("click", () => {
+  document.getElementById("navlinks").classList.toggle("open");
+});
+document.querySelectorAll("#navlinks a").forEach(a =>
+  a.addEventListener("click", () => document.getElementById("navlinks").classList.remove("open"))
+);
+document.querySelectorAll("[data-copy]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const code = btn.closest(".code").querySelector("pre").innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      const t = btn.textContent; btn.textContent = "copied ✓";
+      setTimeout(() => (btn.textContent = t), 1400);
+    }).catch(() => {});
+  });
+});
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll(".reveal:not(.in)").forEach(el => io.observe(el));
+</script>
+</body>
+</html>
